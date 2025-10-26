@@ -60,36 +60,36 @@ function SalesList({ products, salesHistory, onSellProduct, onDeleteSale }) {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Sell</h2>
-        <p className="text-gray-600">Click the checkbox to sell one unit of a product</p>
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Quick Sell</h2>
+        <p className="text-sm sm:text-base text-gray-600">Click the green button to sell a product</p>
       </div>
 
       {activeProducts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-500 text-lg">No products available to sell</p>
-          <p className="text-gray-400 text-sm mt-2">Add products first to start selling</p>
+        <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
+          <p className="text-base sm:text-lg text-gray-500">No products available to sell</p>
+          <p className="text-sm text-gray-400 mt-2">Add products first to start selling</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {activeProducts.map((product) => {
             const remaining = product.totalUnits - product.soldUnits
             const progress = (product.soldUnits / product.totalUnits) * 100
             
             return (
               <div key={product.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
-                      <p className="text-sm text-gray-500">{product.category}</p>
+                <div className="p-4 sm:p-6">
+                  <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">{product.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">{product.category}</p>
                     </div>
                     <button
                       onClick={() => handleSellClick(product)}
-                      className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full transition-colors shadow-md"
-                      title="Sell one unit"
+                      className="bg-green-500 hover:bg-green-600 text-white p-2 sm:p-3 rounded-full transition-colors shadow-md flex-shrink-0 ml-2"
+                      title="Sell"
                     >
-                      <Check size={24} />
+                      <Check size={20} className="sm:w-6 sm:h-6" />
                     </button>
                   </div>
                   
@@ -286,14 +286,72 @@ function SalesList({ products, salesHistory, onSellProduct, onDeleteSale }) {
         const currentSales = reversedSales.slice(startIndex, endIndex)
 
         return (
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-900">Recent Sales</h3>
-              <div className="text-sm text-gray-600">
+          <div className="mt-6 sm:mt-8">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Recent Sales</h3>
+              <div className="text-xs sm:text-sm text-gray-600">
                 Total: {salesHistory.length} sale{salesHistory.length !== 1 ? 's' : ''}
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            
+            {/* Mobile Card View */}
+            <div className="block lg:hidden space-y-3">
+              {currentSales.map((sale) => (
+                <div key={sale.id} className="bg-white rounded-lg shadow p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500">Invoice</p>
+                      <p className="text-sm font-medium text-gray-900">{sale.invoiceNumber}</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => downloadInvoice(sale)}
+                        className="text-blue-600 hover:text-blue-900 p-1"
+                        title="Download"
+                      >
+                        <Download size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this sale?')) {
+                            onDeleteSale(sale.id)
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-900 p-1"
+                        title="Delete"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-500">Customer</p>
+                      <p className="font-medium text-gray-900">{sale.customerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Product</p>
+                      <p className="text-gray-900">{sale.productName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Quantity</p>
+                      <p className="text-gray-900">{sale.quantity}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Amount</p>
+                      <p className="font-semibold text-green-600">{sale.totalAmount.toLocaleString()} FCFA</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs text-gray-500">Date</p>
+                      <p className="text-sm text-gray-900">{sale.dateFormatted}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
